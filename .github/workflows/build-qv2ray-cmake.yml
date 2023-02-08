@@ -19,7 +19,8 @@ jobs:
       - name: Get commit message
         id: get_message
         run: |
-          echo "::set-output name=message::$(git log --format=%B -n 1 ${{ github.event.after }} | tr '\n' ' ')"
+          #echo "::set-output name=message::$(git log --format=%B -n 1 ${{ github.event.after }} | tr '\n' ' ')"
+          echo "message::$(git log --format=%B -n 1 ${{ github.event.after }} | tr '\n' ' ')" >> $GITHUB_OUTPUT
           echo "message=\"$(git log --format=%B -n 1 ${{ github.event.after }} | tr '\n' ' ')\"" >> $GITHUB_ENV
   build:
     needs: check_commit_msg
@@ -42,7 +43,8 @@ jobs:
       - name: Get the version
         id: get_version
         shell: bash
-        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+        # run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+        run: echo "{name}={value}" >> $GITHUB_OUTPUT
       - name: Checking out sources
         uses: actions/checkout@v2
         with:
@@ -108,10 +110,10 @@ jobs:
           cd ./libs
           ./setup-libs.sh windows ${{ matrix.arch }}
       # ========================================================================================================= Generate MakeFile and Build
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         if: matrix.platform == 'macos-latest'
         with:
-          node-version: "12.x"
+          node-version: "16.x"
       - run: npm install -g appdmg
         if: matrix.platform == 'macos-latest'
       - name: macOS - ${{ matrix.qt_version }} - Generate Dependencies and Build
